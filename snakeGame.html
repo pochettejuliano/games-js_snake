@@ -45,6 +45,13 @@
 			var COLUMNS = 40;
 			var ROWS = 40;
 
+			var DIRECTION_MAP = {
+				"N": { "key": "y", "value": -1 },
+				"E": { "key": "x", "value": 1 },
+				"W": { "key": "x", "value": -1 },
+				"S": { "key": "y", "value": 1 }
+			};
+
 			var boardData;
 
 			var foodData;
@@ -133,25 +140,7 @@
 				var snakeTail;
 
 				// create new snakeHeadPos based on direction
-				switch ( snakeDir ) {
-					case "N" :
-						snakeHeadPos.y--;
-					break;
-
-					case "E" :
-						snakeHeadPos.x++;
-					break;
-
-					case "W" :
-						snakeHeadPos.x--;
-					break;
-
-					case "S" :
-						snakeHeadPos.y++;
-					break;
-
-					default :
-				}
+				snakeHeadPos[ DIRECTION_MAP[ snakeDir ][ "key" ] ] += DIRECTION_MAP[ snakeDir ][ "value" ];
 
 				// check if snake head will hit edges or its body
 				if ( snakeHeadPos.y < 0 || snakeHeadPos.y >= ROWS ||
