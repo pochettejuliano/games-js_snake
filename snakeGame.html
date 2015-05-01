@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+	<head>
+		<title>JavaScript Snake Game</title>
+		<meta charset="utf-8" />
+
+		<style type="text/css">
+			body {
+				font-family: Helvetica;
+				text-align: center;
+			}
+
+			table {
+				border: 1px solid gray;
+				margin: auto;
+			}
+
+			td {
+				margin: 0;
+				padding: 0;
+			}
+
+			img {
+				display: block;
+			}
+		</style>
+	</head>
+
+	<body onload="init()">
+		<h3>JavaScript Snake Game</h3>
+
+		<p>
+			Use the Up, Down, Left, and Right arrow keys to move the snake <br />
+			Feed the snake by directing it to the food that appear on the board <br />
+			The game ends when the snake touches the board edges or any part of its body<br />
+		</p>
+
+		<table id="board"></table>
+
+		<p id="endGameField"></p>
+
+
+		<script type="text/javascript">
+			var COLUMNS = 40;
+			var ROWS = 40;
+
+			var boardData;
+
+			var foodData;
+			var foodIsEaten;
+
+			var snakeHeadPos;
+			var snakeData;
+			var snakeDir;
+
+			var isTimerRunning;
+			var timerKey;
+			
+			function init () {
+				var boardContent = "";
+				var board;
+				
+				var count = 0;
+				var i, j;
+
+				boardData = new Array();
+				board = document.getElementById( "board" );
+				
+				for ( i = 0; i < ROWS; i++ ) {
+
+					// creation of board data (two-dimensional array)
+					boardData.push( new Array() );
+
+					// creation of board content (HTML elements)
+					boardContent += "<tr>";
+
+					for ( j = 0; j < COLUMNS; j++ ) {
+						boardContent += '<td><img src="blankWhite.png" /></td>'
+					}
+
+					boardContent += "</tr>";
+				}
+
+				board.innerHTML = boardContent;
+
+				// map the images to board
+				for ( i = 0; i < ROWS; i++ ) {
+					for ( j = 0; j < COLUMNS; j++ ) {
+						boardData[ i ][ j ] = document.images[ count++ ];
+					}
+				}
+
+				// randomly position the snake and set the data
+				i = Math.floor( Math.random() * ( ( ROWS / 2 ) + ( ROWS / 4 ) ) );
+				j = Math.floor( Math.random() * ( ( COLUMNS / 2 ) + ( COLUMNS / 4 ) ) ); 
+
+				boardData[ i ][ j ].setAttribute( "src", "blankBlack.png" );
+
+				snakeHeadPos = new Object();
+				snakeHeadPos.y = i;
+				snakeHeadPos.x = j;
+
+				snakeData = new Array();
+				snakeData.push( boardData[ snakeHeadPos.y ][ snakeHeadPos.x ] );
+
+				// set food flag to true so that one could be added to the board
+				foodIsEaten = true;
+
+				// listener for key presses
+				document.body.addEventListener( "keydown", onKeyDown );
+			}
+
+			function onKeyDown ( evt ) {
+				//  implementation 1: does not work in Chrome
+				/*
+				switch ( evt.key ) {
+					case "Up" :
+						snakeDir = "N";
+					break;
+
+					case "Down" :
+						snakeDir = "S";
+					break;
+
+					case "Left" :
+						snakeDir = "W";
+					break;
+
+					case "Right" :
+						snakeDir = "E";
+					break;
+				}
+				*/
+
+				// implementation 2: adding key code for Chrome
+				if ( evt.key == "Up" || evt.keyCode == 38 ) {
+					snakeDir = "N";
+				} else if ( evt.key == "Down" || evt.keyCode == 40 ) {
+					snakeDir = "S";
+				} else if ( evt.key == "Left" || evt.keyCode == 37 ) {
+					snakeDir = "W";
+				} else if ( evt.key == "Right" || evt.keyCode == 39 ) {
+					snakeDir = "E";
+				}
+
+				if ( !isTimerRunning ) {
+					toggleTimer();
+				}
+			}
+
+			function onTimer () {
+				var snakeTail;
+
+				// create new snakeHeadPos based on direction
+				
+				//  implementation 1: does not work in Chrome
+				/*
+				switch ( snakeDir ) {
+					case "N" :
+						snakeHeadPos.y--;
+					break;
+
+					case "E" :
+						snakeHeadPos.x++;
+					break;
+
+					case "W" :
+						snakeHeadPos.x--;
+					break;
+
+					case "S" :
+						snakeHeadPos.y++;
+					break;
+
+					default :
+				}
+				*/
+				
+				// implementation 2
+				if ( snakeDir == "N" ) {
+					snakeHeadPos.y--;
+				} else if ( snakeDir == "E" ) {
+					snakeHeadPos.x++;
+				} else if ( snakeDir == "W" ) {
+					snakeHeadPos.x--;
+				} else {
+					snakeHeadPos.y++;
+				}
+
+				
+				// check if snake head will hit edges or its body
+				if ( snakeHeadPos.y < 0 || snakeHeadPos.y > ROWS ||
+				     snakeHeadPos.x < 0 || snakeHeadPos.x > COLUMNS ||
+				     snakeData.indexOf( boardData[ snakeHeadPos.y ][ snakeHeadPos.x ] ) != -1 ) {
+
+					toggleTimer();
+
+					document.body.removeEventListener( "keydown", onKeyDown );
+					document.getElementById( "endGameField" ).innerHTML = "Game has ended, thanks for playing! Refresh the page to play again."
+
+					return;
+				}
+
+				// remove the tail from oldSnakeData and "deactivate" it
+				snakeTail = snakeData.shift();
+				snakeTail.setAttribute( "src", "blankWhite.png" );
+
+				// add new head position and "activate" it
+				snakeData.push( boardData[ snakeHeadPos.y ][ snakeHeadPos.x ] );
+				snakeData[ snakeData.length - 1 ].setAttribute( "src", "blankBlack.png" );
+
+				// check if food was eaten and set again
+				if ( foodData && snakeData[ snakeData.length - 1 ] == foodData ) {
+					// add back tail
+					snakeData.unshift( snakeTail );
+					snakeTail.setAttribute( "src", "blankBlack.png" );
+
+					foodData = null;
+					foodIsEaten = true;
+				}
+
+				setFood();
+			}
+
+			function setFood () {
+				if ( !foodIsEaten ) {
+					return;
+				}
+
+				var foodPosX = Math.floor( Math.random() * COLUMNS );
+				var foodPosY = Math.floor( Math.random() * ROWS );
+
+				while ( snakeData.indexOf( boardData[ foodPosY ][ foodPosX ] ) != -1 ) {
+					foodPosX = Math.floor( Math.random() * COLUMNS );
+					foodPosY = Math.floor( Math.random() * ROWS );
+				}
+
+				foodData = boardData[ foodPosY ][ foodPosX ];
+				foodData.setAttribute( "src", "foodRed.png" );
+
+				foodIsEaten = false;
+			}
+
+			function toggleTimer () {
+				if ( !isTimerRunning ) {
+					timerKey = setInterval( onTimer, 100 );
+				} else {
+					clearInterval( timerKey );
+				}
+
+				isTimerRunning = !isTimerRunning;
+			}
+		</script>
+	</body>
+</html>
