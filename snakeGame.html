@@ -2,7 +2,7 @@
 <html lang="en-US">
 
 	<head>
-		<title>JavaScript Snake Game</title>
+		<title>(Vanilla) JavaScript Snake Game</title>
 		<meta charset="utf-8" />
 
 		<style type="text/css">
@@ -28,7 +28,7 @@
 	</head>
 
 	<body onload="init()">
-		<h3>JavaScript Snake Game</h3>
+		<h3>(Vanilla) JavaScript Snake Game</h3>
 
 		<p>
 			Use the Up, Down, Left, and Right arrow keys to move the snake <br />
@@ -56,17 +56,17 @@
 
 			var isTimerRunning;
 			var timerKey;
-			
+
 			function init () {
 				var boardContent = "";
 				var board;
-				
+
 				var count = 0;
 				var i, j;
 
 				boardData = new Array();
 				board = document.getElementById( "board" );
-				
+
 				for ( i = 0; i < ROWS; i++ ) {
 
 					// creation of board data (two-dimensional array)
@@ -93,7 +93,7 @@
 
 				// randomly position the snake and set the data
 				i = Math.floor( Math.random() * ( ( ROWS / 2 ) + ( ROWS / 4 ) ) );
-				j = Math.floor( Math.random() * ( ( COLUMNS / 2 ) + ( COLUMNS / 4 ) ) ); 
+				j = Math.floor( Math.random() * ( ( COLUMNS / 2 ) + ( COLUMNS / 4 ) ) );
 
 				boardData[ i ][ j ].setAttribute( "src", "blankBlack.png" );
 
@@ -112,28 +112,8 @@
 			}
 
 			function onKeyDown ( evt ) {
-				//  implementation 1: does not work in Chrome
-				/*
-				switch ( evt.key ) {
-					case "Up" :
-						snakeDir = "N";
-					break;
 
-					case "Down" :
-						snakeDir = "S";
-					break;
-
-					case "Left" :
-						snakeDir = "W";
-					break;
-
-					case "Right" :
-						snakeDir = "E";
-					break;
-				}
-				*/
-
-				// implementation 2: adding key code for Chrome
+				// checking key and key code just to make sure it works with different browsers
 				if ( evt.key == "Up" || evt.keyCode == 38 ) {
 					snakeDir = "N";
 				} else if ( evt.key == "Down" || evt.keyCode == 40 ) {
@@ -153,9 +133,6 @@
 				var snakeTail;
 
 				// create new snakeHeadPos based on direction
-				
-				//  implementation 1: does not work in Chrome
-				/*
 				switch ( snakeDir ) {
 					case "N" :
 						snakeHeadPos.y--;
@@ -175,29 +152,15 @@
 
 					default :
 				}
-				*/
-				
-				// implementation 2
-				if ( snakeDir == "N" ) {
-					snakeHeadPos.y--;
-				} else if ( snakeDir == "E" ) {
-					snakeHeadPos.x++;
-				} else if ( snakeDir == "W" ) {
-					snakeHeadPos.x--;
-				} else {
-					snakeHeadPos.y++;
-				}
 
-				
 				// check if snake head will hit edges or its body
-				if ( snakeHeadPos.y < 0 || snakeHeadPos.y > ROWS ||
-				     snakeHeadPos.x < 0 || snakeHeadPos.x > COLUMNS ||
+				if ( snakeHeadPos.y < 0 || snakeHeadPos.y >= ROWS ||
+				     snakeHeadPos.x < 0 || snakeHeadPos.x >= COLUMNS ||
 				     snakeData.indexOf( boardData[ snakeHeadPos.y ][ snakeHeadPos.x ] ) != -1 ) {
 
 					toggleTimer();
-
 					document.body.removeEventListener( "keydown", onKeyDown );
-					document.getElementById( "endGameField" ).innerHTML = "Game has ended, thanks for playing! Refresh the page to play again."
+					document.getElementById( "endGameField" ).innerHTML = "Game over, thanks for playing! Refresh page to play again.";
 
 					return;
 				}
@@ -212,6 +175,7 @@
 
 				// check if food was eaten and set again
 				if ( foodData && snakeData[ snakeData.length - 1 ] == foodData ) {
+
 					// add back tail
 					snakeData.unshift( snakeTail );
 					snakeTail.setAttribute( "src", "blankBlack.png" );
